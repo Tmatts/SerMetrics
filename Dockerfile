@@ -1,4 +1,4 @@
-FROM python:3.12
+FROM python:3.13.2-slim
 
 WORKDIR /app
 
@@ -15,7 +15,7 @@ RUN pipenv install --deploy --system
 COPY . .
 
 # Expose the Django port
-EXPOSE 8000
+# EXPOSE 8000
 
-# Run Django
-CMD ["gunicorn", "myproject.wsgi:application", "--bind", "0.0.0.0:8000"]
+# Run app.py
+CMD ["python3", "./app.py"]
