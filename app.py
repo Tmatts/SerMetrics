@@ -46,9 +46,9 @@ class SalesforceJWTAuth:
                 print("✅ New access token obtained.")
                 return self.access_token
             else:
-                raise Exception(f"❌ Authentication failed: {response_data}")
+                raise requests.exceptions.HTTPError(f"❌ Authentication failed: {response_data}")
         else:
-            raise Exception(f"❌ Failed to obtain access token. HTTP {response.status_code}: {response.text}")
+            raise requests.exceptions.RequestException(f"❌ Failed to obtain access token. HTTP {response.status_code}: {response.text}")
 
     def get_access_token(self):
         """Returns a valid access token, refreshing it if expired."""
