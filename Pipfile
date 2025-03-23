@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 simple-salesforce = "*"
+pandas = "*"
 
 [dev-packages]
 
