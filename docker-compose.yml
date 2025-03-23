@@ -1,0 +1,9 @@
+services:
+  sermetrics:
+    image: sermetrics
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - 8000:8000
+    command: pipenv run python3 app.py
