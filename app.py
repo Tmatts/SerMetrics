@@ -158,6 +158,7 @@ class SalesforceRequests:
 class SalesforceReportParser:
     def __init__(self, report_data):
         self.report_data = report_data
+        pprint(report_data)
     
     def to_dataframe(self) -> pd.DataFrame:
         """
