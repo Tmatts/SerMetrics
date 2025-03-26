@@ -173,10 +173,11 @@ class SalesforceReportParser:
             rows = fact_map['T!T']['rows']
 
             # Get column labels
+            # Get column labels
             column_labels = [
-                col.get('label', col.get('name', ''))
-                for col in self.report_data['reportExtendedMetadata']['detailColumnInfo'].values()
-                if col['name'] in columns_meta
+                detail_info.get('label', detail_info.get('name', ''))
+                for column_key in columns_meta
+                if (detail_info := self.report_data['reportExtendedMetadata']['detailColumnInfo'].get(column_key))
             ]
 
             # Extract row data
@@ -194,7 +195,7 @@ class SalesforceReportParser:
 auth = SalesforceJWTAuth()
 sf = auth.connect_to_salesforce()
 sf_requests = SalesforceRequests(sf)
-report_data = sf_requests.fetch_report("00OHq000007fYoNMAU", api_version="v63.0", include_details=False)
+report_data = sf_requests.fetch_report("00OHq000007fYBBMA2", api_version="v63.0", include_details=False)
 
 invoice_report = SalesforceReportParser(report_data)
 invoice_df = invoice_report.to_dataframe()
