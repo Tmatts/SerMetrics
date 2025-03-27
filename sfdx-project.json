@@ -1,0 +1,11 @@
+{
+    "packageDirectories": [
+        {
+            "path": "sermetrics",
+            "default": true
+        }
+    ],
+    "namespace": "",
+    "sfdcLoginUrl": "https://login.salesforce.com",
+    "sourceApiVersion": "63.0"
+}
