@@ -14,7 +14,10 @@ class SalesforceJWTAuth:
         self.token_expiry = 0
         self.instance_url = None # Set dynamicaly
         self.api_version = None # Set dynamicaly
-        self.headers = None
+        self.headers = {
+            "Authorization": f"Bearer {self.access_token}",
+            "Content-Type": "application/json"
+        }
 
         self.get_salesforce_credentials()
 
@@ -47,12 +50,12 @@ class SalesforceJWTAuth:
             raise RuntimeError("You must authenticate before retrieving API version.")
 
         url = f"{self.instance_url}/services/data/"
-        headers = {
+        self.headers = {
             "Authorization": f"Bearer {self.access_token}",
             "Content-Type": "application/json"
         }
 
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=self.headers)
         response.raise_for_status()
         versions = response.json()
         self.api_version = versions[-1]["version"]
@@ -85,7 +88,7 @@ class SalesforceJWTAuth:
                 self.access_token = response_data["access_token"]
                 self.instance_url = response_data["instance_url"]
                 self.token_expiry = int(time.time()) + 300  # Token valid for 5 minutes, 1800 = 30 minutes
-                self.headers = {"Authorization": f"Bearer {self.access_token}"}
+                # self.headers = {"Authorization": f"Bearer {self.access_token}"}
                 print("✅ New access token obtained.")
                 return self.access_token
             else:
@@ -113,44 +116,34 @@ class SalesforceRequests:
         self.headers = sf_auth_obj.headers
         self.api_version = sf_auth_obj.api_version
 
-    def fetch_report_data(self, report_id: str, include_details: bool = True):
-        detail_param = 'includeDetails=true' if include_details else 'includeDetails=false'
+    def fetch_report_data(self, report_id: str, include_details: bool=True):
+        detail_param = include_details
         
         """
-        Run the report with pagination and return all rows.
+        Run the report Asynchronously and get all instances of the report.
         """
         all_rows = []
-        page_token = None
-
-        while True:
-            try:
-                if page_token:
-                    url = f"{self.instance_url}/services/data/{self.api_version}/analytics/reports/{report_id}?pageToken={page_token}&includeDetails={detail_param}"
-                    response = requests.get(url, headers=self.headers)
-                else:
-                    url = f"{self.instance_url}/services/data/{self.api_version}/analytics/reports/{report_id}"
-                    body = {
-                        "reportMetadata": {},
-                        "includeDetails": detail_param
-                    }
-                    response = requests.post(url, headers=self.headers, json=body)
-
-                data = response.json()
-
-                rows = data.get('factMap', {}).get('T!T', {}).get('rows', [])
-                all_rows.extend(rows)
-
-                page_token = data.get('pageToken')
-                if not page_token:
-                    break
-            except requests.exceptions.HTTPError as e:  # Catch HTTP errors
-                print(f"Failed to fetch report {report_id}: {e}")
-            except requests.exceptions.RequestException as e:  # Catch network errors
-                print(f"Failed to fetch report {report_id}: {e}")
-            except Exception as e:  # Catch all other exceptions
-                print(f"Failed to fetch report {report_id}: {response.status_code}\n{response.text}")
-
-        return all_rows, data  # or keep data separately for column headers       
+        body = {}
+        url = f"{self.instance_url}/services/data/v{self.api_version}/analytics/reports/{report_id}/instances"
+        try:
+            response = requests.post(url, headers=self.headers, json=body)
+            response.raise_for_status()
+            data = response.json()  # Raise an error for bad responses
+            if data["id"] is not None:
+                url = f"{self.instance_url}/services/data/v{self.api_version}/analytics/reports/{report_id}/instances/{data['id']}"
+                response = requests.get(url, headers=self.headers, json=body)
+                response.raise_for_status()
+                data = response.json()  # Raise an error for bad responses
+                if data["factMap"] is not None:
+                    all_rows = data.get('factMap', {}).get('T!T', {}).get('rows', [])
+            # rows = data.get('factMap', {}).get('T!T', {}).get('rows', [])
+        except requests.exceptions.HTTPError as e:  # Catch HTTP errors
+            print(f"Failed to fetch report {report_id}: {e}")
+        except requests.exceptions.RequestException as e:  # Catch network errors
+            print(f"Failed to fetch report {report_id}: {e}")
+        except Exception as e:  # Catch all other exceptions
+            print(f"Failed to fetch report {report_id}: {response.status_code}\n{response.text}")
+            return all_rows, data  # or keep data separately for column headers   
 
     def query(self, query):
         return self.sf.query_all(query)
@@ -261,7 +254,7 @@ class SalesforceReportParser:
 auth = SalesforceJWTAuth()
 sf = auth.connect_to_salesforce()
 sf_requests = SalesforceRequests(auth, sf)
-report_data = sf_requests.fetch_report_data("00OHq000007fYBBMA2", include_details=False)
+report_data = sf_requests.fetch_report_data("00OHq000007fYBBMA2", include_details=True)
 
 invoice_report = SalesforceReportParser(report_data)
 invoice_df = invoice_report.to_dataframe()
