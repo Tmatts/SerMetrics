@@ -115,17 +115,44 @@ class SalesforceRequests:
         self.instance_url = sf_auth_obj.instance_url
         self.headers = sf_auth_obj.headers
         self.api_version = sf_auth_obj.api_version
+        self.query_job_id = None
 
-    def fetch_report_data(self, report_id: str):
-        
-        """
-        Run the report Asynchronously and get all instances of the report.
-        """
+    def call_api(self, url: str ,body: dict, method: str = "GET") -> dict:
+        # Use requests to call the Salesforce API
+        try:
+            if method == "POST":
+                response = requests.post(url, headers=self.headers, json=body)
+            elif method == "GET":
+                response = requests.get(url, headers=self.headers, json=body)
+            response.raise_for_status() # Raise an error for bad responses
+            pprint(response.content)
+        except requests.exceptions.HTTPError as e:  # Catch HTTP errors
+            print(f"{self.method} failed with an HTTP error when initiating asynchoronous report {report_id}: {e}")
+        except requests.exceptions.RequestException as e:  # Catch network errors
+            print(f"{self.method} failed a REQUEST EXCEPTION when initiating asynchoronous report {report_id}: {e}")
+        except Exception as e:  # Catch all other exceptions
+            print(f"{self.method} failed to fetch report {report_id}: {response.status_code}\n{response.text}")
+
+    def create_query_job(self):
+        # Run the report Asynchronously - Create a query job.
         body = {
                 "operation": "query",
-                "query": "SELECT TimeSheetNumber, CreatedDate, ServiceResourceID FROM Timesheet WHERE SR_Sales_Organization__c = '3400' AND Auxiliar__c = false AND CurrencyIsoCode = 'GBP'" 
+                "query": "SELECT TimeSheetNumber, CreatedDate, ServiceResourceID FROM"
+                " Timesheet WHERE "
+                "SR_Sales_Organization__c = '3400' AND Auxiliar__c = false AND CurrencyIsoCode = 'GBP'" 
         }
-        url = f"{self.instance_url}/services/data/v{self.api_version}/jobs/query"
+        url = f"{self.instance_url}/services/data/v{self.api_version}/jobs/query"        
+        self.call_api(url, body)
+
+    def get_query_info(self, report_id: str):
+        # Check if the report was created successfully and completed
+        body = {
+                "operation": "query",
+                "query": "SELECT TimeSheetNumber, CreatedDate, ServiceResourceID FROM"
+                " Timesheet WHERE "
+                "SR_Sales_Organization__c = '3400' AND Auxiliar__c = false AND CurrencyIsoCode = 'GBP'" 
+        }
+        url = f"{self.instance_url}/services/data/v{self.api_version}/jobs/query/"
         
         try:
             response = requests.post(url, headers=self.headers, json=body)
@@ -136,8 +163,11 @@ class SalesforceRequests:
         except requests.exceptions.RequestException as e:  # Catch network errors
             print(f"POST failed a REQUEST EXCEPTION when initiating asynchoronous report {report_id}: {e}")
         except Exception as e:  # Catch all other exceptions
-            print(f"POST failed to fetch report {report_id}: {response.status_code}\n{response.text}")   
-        
+            print(f"POST failed to fetch report {report_id}: {response.status_code}\n{response.text}")  
+    
+    def fetch_report_data(self, report_id: str):
+        # Fetch the report data
+
         if response.json()["id"] is not None:
             body = {}
             status = "" # A null string i.e. False is returned in the get.response header, when the report is done
@@ -153,7 +183,7 @@ class SalesforceRequests:
                 status = status_response.headers["Sforce-Locator"]
                 print(f"Response data = {status_response.content}")
             
-            csv_data = io.BytesIO(status_response.content)
+            csv_data = BytesIO(status_response.content)
             # try:
             #     url = f"{self.instance_url}/services/data/v{self.api_version}/analytics/reports/{report_id}/instances/{response.json()['id']}"
             #     response = requests.get(url, headers=self.headers, json=body).json()
