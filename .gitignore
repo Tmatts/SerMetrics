@@ -170,3 +170,12 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 .qodo
+
+# VS Code
+.vscode/
+
+# Salesforce DX
+.sf/
+.sfdx/
+.sf/config.json
+.sfdx/sfdx-config.json
