@@ -5,6 +5,7 @@ from pprint import pprint  # Import pprint for pretty printing
 from simple_salesforce import Salesforce
 import pandas as pd
 import os
+from io import BytesIO
 from dotenv import load_dotenv
 
 
@@ -14,7 +15,10 @@ class SalesforceJWTAuth:
         self.token_expiry = 0
         self.instance_url = None # Set dynamicaly
         self.api_version = None # Set dynamicaly
-        self.headers = None
+        self.headers = {
+            "Authorization": f"Bearer {self.access_token}",
+            "Content-Type": "application/json"
+        }
 
         self.get_salesforce_credentials()
 
@@ -47,12 +51,12 @@ class SalesforceJWTAuth:
             raise RuntimeError("You must authenticate before retrieving API version.")
 
         url = f"{self.instance_url}/services/data/"
-        headers = {
+        self.headers = {
             "Authorization": f"Bearer {self.access_token}",
             "Content-Type": "application/json"
         }
 
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=self.headers)
         response.raise_for_status()
         versions = response.json()
         self.api_version = versions[-1]["version"]
@@ -85,7 +89,6 @@ class SalesforceJWTAuth:
                 self.access_token = response_data["access_token"]
                 self.instance_url = response_data["instance_url"]
                 self.token_expiry = int(time.time()) + 300  # Token valid for 5 minutes, 1800 = 30 minutes
-                self.headers = {"Authorization": f"Bearer {self.access_token}"}
                 print("✅ New access token obtained.")
                 return self.access_token
             else:
@@ -112,45 +115,91 @@ class SalesforceRequests:
         self.instance_url = sf_auth_obj.instance_url
         self.headers = sf_auth_obj.headers
         self.api_version = sf_auth_obj.api_version
+        self.query_job_id = None
 
-    def fetch_report_data(self, report_id: str, include_details: bool = True):
-        detail_param = 'includeDetails=true' if include_details else 'includeDetails=false'
+    def call_api(self, url: str ,body: dict, method: str = "GET") -> dict:
+        # Use requests to call the Salesforce API
+        try:
+            if method == "POST":
+                response = requests.post(url, headers=self.headers, json=body)
+            elif method == "GET":
+                response = requests.get(url, headers=self.headers, json=body)
+            response.raise_for_status() # Raise an error for bad responses
+            pprint(response.content)
+        except requests.exceptions.HTTPError as e:  # Catch HTTP errors
+            print(f"{self.method} failed with an HTTP error when initiating asynchoronous report {report_id}: {e}")
+        except requests.exceptions.RequestException as e:  # Catch network errors
+            print(f"{self.method} failed a REQUEST EXCEPTION when initiating asynchoronous report {report_id}: {e}")
+        except Exception as e:  # Catch all other exceptions
+            print(f"{self.method} failed to fetch report {report_id}: {response.status_code}\n{response.text}")
+
+    def create_query_job(self):
+        # Run the report Asynchronously - Create a query job.
+        body = {
+                "operation": "query",
+                "query": "SELECT TimeSheetNumber, CreatedDate, ServiceResourceID FROM"
+                " Timesheet WHERE "
+                "SR_Sales_Organization__c = '3400' AND Auxiliar__c = false AND CurrencyIsoCode = 'GBP'" 
+        }
+        url = f"{self.instance_url}/services/data/v{self.api_version}/jobs/query"        
+        self.call_api(url, body)
+
+    def get_query_info(self, report_id: str):
+        # Check if the report was created successfully and completed
+        body = {
+                "operation": "query",
+                "query": "SELECT TimeSheetNumber, CreatedDate, ServiceResourceID FROM"
+                " Timesheet WHERE "
+                "SR_Sales_Organization__c = '3400' AND Auxiliar__c = false AND CurrencyIsoCode = 'GBP'" 
+        }
+        url = f"{self.instance_url}/services/data/v{self.api_version}/jobs/query/"
         
-        """
-        Run the report with pagination and return all rows.
-        """
-        all_rows = []
-        page_token = None
+        try:
+            response = requests.post(url, headers=self.headers, json=body)
+            response.raise_for_status() # Raise an error for bad responses
+            pprint(response.content)
+        except requests.exceptions.HTTPError as e:  # Catch HTTP errors
+            print(f"POST failed with an HTTP error when initiating asynchoronous report {report_id}: {e}")
+        except requests.exceptions.RequestException as e:  # Catch network errors
+            print(f"POST failed a REQUEST EXCEPTION when initiating asynchoronous report {report_id}: {e}")
+        except Exception as e:  # Catch all other exceptions
+            print(f"POST failed to fetch report {report_id}: {response.status_code}\n{response.text}")  
+    
+    def fetch_report_data(self, report_id: str):
+        # Fetch the report data
 
-        while True:
-            try:
-                if page_token:
-                    url = f"{self.instance_url}/services/data/{self.api_version}/analytics/reports/{report_id}?pageToken={page_token}&includeDetails={detail_param}"
-                    response = requests.get(url, headers=self.headers)
-                else:
-                    url = f"{self.instance_url}/services/data/{self.api_version}/analytics/reports/{report_id}"
-                    body = {
-                        "reportMetadata": {},
-                        "includeDetails": detail_param
-                    }
-                    response = requests.post(url, headers=self.headers, json=body)
-
-                data = response.json()
-
-                rows = data.get('factMap', {}).get('T!T', {}).get('rows', [])
-                all_rows.extend(rows)
-
-                page_token = data.get('pageToken')
-                if not page_token:
-                    break
-            except requests.exceptions.HTTPError as e:  # Catch HTTP errors
-                print(f"Failed to fetch report {report_id}: {e}")
-            except requests.exceptions.RequestException as e:  # Catch network errors
-                print(f"Failed to fetch report {report_id}: {e}")
-            except Exception as e:  # Catch all other exceptions
-                print(f"Failed to fetch report {report_id}: {response.status_code}\n{response.text}")
-
-        return all_rows, data  # or keep data separately for column headers       
+        if response.json()["id"] is not None:
+            body = {}
+            status = "" # A null string i.e. False is returned in the get.response header, when the report is done
+            while status != "null":
+                # Check the status of the report
+                print("Report is still running...")
+                time.sleep(5)
+                check_status_url = f"{url}/{response.json()['id']}/results"
+                status_response = requests.get(check_status_url, headers=self.headers, json=body)
+                status_response.raise_for_status() # Raise an error for bad responses
+                print(f"Status response type = {type(status_response.headers)}")
+                print(f"status_response = {status_response.headers["Sforce-Locator"]}")
+                status = status_response.headers["Sforce-Locator"]
+                print(f"Response data = {status_response.content}")
+            
+            csv_data = BytesIO(status_response.content)
+            # try:
+            #     url = f"{self.instance_url}/services/data/v{self.api_version}/analytics/reports/{report_id}/instances/{response.json()['id']}"
+            #     response = requests.get(url, headers=self.headers, json=body).json()
+            #     response.raise_for_status()
+            #     pprint(response.json())
+            #     data = response.json()  # Raise an error for bad responses
+            #     if data["factMap"] is not None:
+            #         all_rows = data.get('factMap', {}).get('T!T', {}).get('rows', [])
+            # except requests.exceptions.HTTPError as e:  # Catch HTTP errors
+            #     print(f"HTTP error occured. Failed to GET asynchronous report instance with id: {report_id}: {e}")
+            # except requests.exceptions.RequestException as e:  # Catch network errors
+            #     print(f"REQUESTS EXCEPTION occured. Failed to GET asynchronous report instance with id: {report_id}: {e}")
+            # except Exception as e:  # Catch all other exceptions
+            #     print(f"GET Failed to fetch report instance {report_id}: {response.status_code}\n{response.text}")
+            return pd.read_csv(csv_data) # or keep data separately for column h
+        
 
     def query(self, query):
         return self.sf.query_all(query)
@@ -261,15 +310,11 @@ class SalesforceReportParser:
 auth = SalesforceJWTAuth()
 sf = auth.connect_to_salesforce()
 sf_requests = SalesforceRequests(auth, sf)
-report_data = sf_requests.fetch_report_data("00OHq000007fYBBMA2", include_details=False)
+report_data = sf_requests.fetch_report_data("00OHq000007fYBBMA2")
 
-invoice_report = SalesforceReportParser(report_data)
-invoice_df = invoice_report.to_dataframe()
-print(invoice_df.head())
+# invoice_report = SalesforceReportParser(report_data)
+# invoice_df = invoice_report.to_dataframe()
+print(report_data.head())
 # Example API request
 # query = "SELECT Id, Name FROM User WHERE Name = 'Tony Mattingley'"
 # users = sf.query_all(query)
-
-# if users["totalSize"] > 0:
-#     for record in users["records"]:
-#         print(f"{record['Name']}, Id: {record['Id']}")
