@@ -177,5 +177,3 @@ cython_debug/
 # Salesforce DX
 .sf/
 .sfdx/
-.sf/config.json
-.sfdx/sfdx-config.json
