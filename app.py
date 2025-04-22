@@ -1,5 +1,7 @@
 import jwt
-import time
+from base_sf_rqst import BaseSalesforceRequest
+from bulk_qry_rqst import BulkQueryRequest
+from time import time
 import requests
 from pprint import pprint  # Import pprint for pretty printing
 from simple_salesforce import Salesforce
@@ -7,7 +9,7 @@ import pandas as pd
 import os
 from io import BytesIO
 from dotenv import load_dotenv
-from request_dc import BaseSalesforceRequest
+
 
 class SalesforceJWTAuth:
     def __init__(self):
@@ -313,3 +315,8 @@ print(report_data.head())
 # Example API request
 # query = "SELECT Id, Name FROM User WHERE Name = 'Tony Mattingley'"
 # users = sf.query_all(query)
+
+body = BulkQueryRequest(query="SELECT Id FROM Contact")
+body.validate()
+sf.post_bulk_job(body.to_dict())
+print(body)
