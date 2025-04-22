@@ -7,7 +7,7 @@ import pandas as pd
 import os
 from io import BytesIO
 from dotenv import load_dotenv
-
+from request_dc import BaseSalesforceRequest
 
 class SalesforceJWTAuth:
     def __init__(self):
@@ -111,9 +111,9 @@ class SalesforceJWTAuth:
         return sf_connection
 
 class SalesforceRequests:
-    def __init__(self, sf_auth_obj: SalesforceJWTAuth, sf_obj: Salesforce):
+    def __init__(self, sf_auth_obj: SalesforceJWTAuth, api_headers: dict):
         self.instance_url = sf_auth_obj.instance_url
-        self.headers = sf_auth_obj.headers
+        self.headers = api_headers
         self.api_version = sf_auth_obj.api_version
         self.query_job_id = None
 
@@ -146,12 +146,6 @@ class SalesforceRequests:
 
     def get_query_info(self, report_id: str):
         # Check if the report was created successfully and completed
-        body = {
-                "operation": "query",
-                "query": "SELECT TimeSheetNumber, CreatedDate, ServiceResourceID FROM"
-                " Timesheet WHERE "
-                "SR_Sales_Organization__c = '3400' AND Auxiliar__c = false AND CurrencyIsoCode = 'GBP'" 
-        }
         url = f"{self.instance_url}/services/data/v{self.api_version}/jobs/query/"
         
         try:
@@ -309,7 +303,8 @@ class SalesforceReportParser:
 # Example usage
 auth = SalesforceJWTAuth()
 sf = auth.connect_to_salesforce()
-sf_requests = SalesforceRequests(auth, sf)
+body_timesheets_query = "SELECT TimesheetNumber, CreatedDate, ServiceResourceID FROM Timesheet WHERE SR_Sales_Organization__c = '3400' AND Auxiliar__c = false AND CurrencyIsoCode = 'GBP'"
+sf_requests = SalesforceRequests(auth, sf.headers)
 report_data = sf_requests.fetch_report_data("00OHq000007fYBBMA2")
 
 # invoice_report = SalesforceReportParser(report_data)

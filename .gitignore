@@ -171,5 +171,13 @@ cython_debug/
 .pypirc
 .qodo
 
+<<<<<<< HEAD
 # Salesforce sfdx
+=======
+# VS Code
+.vscode/
+
+# Salesforce DX
+.sf/
+>>>>>>> 36cb6195423a7b538aac6ade0b144e5c192ee9d8
 .sfdx/
