@@ -9,11 +9,6 @@ import pandas as pd
 import os
 from io import BytesIO
 from dotenv import load_dotenv
-<<<<<<< HEAD
-=======
-from base_sf_rqst import BaseSalesforceRequest
-from bulk_qry_rqst import BulkQueryRequest
->>>>>>> 94368e148c7816e00fe27dafc07f30322147466a
 
 
 class SalesforceJWTAuth:
@@ -212,13 +207,7 @@ print(invoice_df.head())
 # query = "SELECT Id, Name FROM User WHERE Name = 'Tony Mattingley'"
 # users = sf.query_all(query)
 
-<<<<<<< HEAD
 body = BulkQueryRequest(query="SELECT Id FROM Contact")
 body.validate()
 sf.post_bulk_job(body.to_dict())
 print(body)
-=======
-# if users["totalSize"] > 0:
-#     for record in users["records"]:
-#         print(f"{record['Name']}, Id: {record['Id']}")
->>>>>>> 94368e148c7816e00fe27dafc07f30322147466a
