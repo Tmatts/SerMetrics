@@ -1,7 +1,7 @@
 import jwt
 from base_sf_rqst import BaseSalesforceRequest
 from bulk_qry_rqst import BulkQueryRequest
-from time import time
+import time
 import requests
 from pprint import pprint  # Import pprint for pretty printing
 from simple_salesforce import Salesforce
