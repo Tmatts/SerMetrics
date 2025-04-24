@@ -7,11 +7,13 @@ import pandas as pd
 import os
 from io import BytesIO
 from dotenv import load_dotenv
-from request_dc import BaseSalesforceRequest
+from base_sf_rqst import BaseSalesforceRequest
+from bulk_qry_rqst import BulkQueryRequest
+
 
 class SalesforceJWTAuth:
     def __init__(self):
-        self.access_token = None
+        self.access_token = None # Set dynamically
         self.token_expiry = 0
         self.instance_url = None # Set dynamicaly
         self.api_version = None # Set dynamicaly
@@ -73,7 +75,7 @@ class SalesforceJWTAuth:
             "aud": self.token_url,
             "exp": int(time.time()) + 300  # JWT valid for 5 minutes
         }
-        return jwt.encode(payload, private_key, algorithm="RS256")
+        return jwt.encode(payload, private_key, alg="RS256")
 
     def request_access_token(self):
         """Get a new access token from Salesforce."""
