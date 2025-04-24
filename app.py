@@ -9,11 +9,16 @@ import pandas as pd
 import os
 from io import BytesIO
 from dotenv import load_dotenv
+<<<<<<< HEAD
+=======
+from base_sf_rqst import BaseSalesforceRequest
+from bulk_qry_rqst import BulkQueryRequest
+>>>>>>> 94368e148c7816e00fe27dafc07f30322147466a
 
 
 class SalesforceJWTAuth:
     def __init__(self):
-        self.access_token = None
+        self.access_token = None # Set dynamically
         self.token_expiry = 0
         self.instance_url = None # Set dynamicaly
         self.api_version = None # Set dynamicaly
@@ -53,12 +58,12 @@ class SalesforceJWTAuth:
             raise RuntimeError("You must authenticate before retrieving API version.")
 
         url = f"{self.instance_url}/services/data/"
-        self.headers = {
+        headers = {
             "Authorization": f"Bearer {self.access_token}",
             "Content-Type": "application/json"
         }
 
-        response = requests.get(url, headers=self.headers)
+        response = requests.get(url, headers=headers)
         response.raise_for_status()
         versions = response.json()
         self.api_version = versions[-1]["version"]
@@ -75,7 +80,7 @@ class SalesforceJWTAuth:
             "aud": self.token_url,
             "exp": int(time.time()) + 300  # JWT valid for 5 minutes
         }
-        return jwt.encode(payload, private_key, algorithm="RS256")
+        return jwt.encode(payload, private_key, alg="RS256")
 
     def request_access_token(self):
         """Get a new access token from Salesforce."""
@@ -91,6 +96,7 @@ class SalesforceJWTAuth:
                 self.access_token = response_data["access_token"]
                 self.instance_url = response_data["instance_url"]
                 self.token_expiry = int(time.time()) + 300  # Token valid for 5 minutes, 1800 = 30 minutes
+                self.headers = {"Authorization": f"Bearer {self.access_token}"}
                 print("✅ New access token obtained.")
                 return self.access_token
             else:
@@ -113,158 +119,49 @@ class SalesforceJWTAuth:
         return sf_connection
 
 class SalesforceRequests:
-    def __init__(self, sf_auth_obj: SalesforceJWTAuth, api_headers: dict):
+    def __init__(self, sf_auth_obj: SalesforceJWTAuth, sf_obj: Salesforce):
         self.instance_url = sf_auth_obj.instance_url
-        self.headers = api_headers
+        self.headers = sf_auth_obj.headers
         self.api_version = sf_auth_obj.api_version
-        self.query_job_id = None
 
-    def call_api(self, url: str ,body: dict, method: str = "GET") -> dict:
-        # Use requests to call the Salesforce API
-        try:
-            if method == "POST":
-                response = requests.post(url, headers=self.headers, json=body)
-            elif method == "GET":
-                response = requests.get(url, headers=self.headers, json=body)
-            response.raise_for_status() # Raise an error for bad responses
-            pprint(response.content)
-        except requests.exceptions.HTTPError as e:  # Catch HTTP errors
-            print(f"{self.method} failed with an HTTP error when initiating asynchoronous report {report_id}: {e}")
-        except requests.exceptions.RequestException as e:  # Catch network errors
-            print(f"{self.method} failed a REQUEST EXCEPTION when initiating asynchoronous report {report_id}: {e}")
-        except Exception as e:  # Catch all other exceptions
-            print(f"{self.method} failed to fetch report {report_id}: {response.status_code}\n{response.text}")
-
-    def create_query_job(self):
-        # Run the report Asynchronously - Create a query job.
-        body = {
-                "operation": "query",
-                "query": "SELECT TimeSheetNumber, CreatedDate, ServiceResourceID FROM"
-                " Timesheet WHERE "
-                "SR_Sales_Organization__c = '3400' AND Auxiliar__c = false AND CurrencyIsoCode = 'GBP'" 
-        }
-        url = f"{self.instance_url}/services/data/v{self.api_version}/jobs/query"        
-        self.call_api(url, body)
-
-    def get_query_info(self, report_id: str):
-        # Check if the report was created successfully and completed
-        url = f"{self.instance_url}/services/data/v{self.api_version}/jobs/query/"
+    def fetch_report_data(self, report_id: str, include_details: bool = True):
+        detail_param = 'includeDetails=true' if include_details else 'includeDetails=false'
         
-        try:
-            response = requests.post(url, headers=self.headers, json=body)
-            response.raise_for_status() # Raise an error for bad responses
-            pprint(response.content)
-        except requests.exceptions.HTTPError as e:  # Catch HTTP errors
-            print(f"POST failed with an HTTP error when initiating asynchoronous report {report_id}: {e}")
-        except requests.exceptions.RequestException as e:  # Catch network errors
-            print(f"POST failed a REQUEST EXCEPTION when initiating asynchoronous report {report_id}: {e}")
-        except Exception as e:  # Catch all other exceptions
-            print(f"POST failed to fetch report {report_id}: {response.status_code}\n{response.text}")  
-    
-    def fetch_report_data(self, report_id: str):
-        # Fetch the report data
+        """
+        Run the report with pagination and return all rows.
+        """
+        all_rows = []
+        page_token = None
 
-        if response.json()["id"] is not None:
-            body = {}
-            status = "" # A null string i.e. False is returned in the get.response header, when the report is done
-            while status != "null":
-                # Check the status of the report
-                print("Report is still running...")
-                time.sleep(5)
-                check_status_url = f"{url}/{response.json()['id']}/results"
-                status_response = requests.get(check_status_url, headers=self.headers, json=body)
-                status_response.raise_for_status() # Raise an error for bad responses
-                print(f"Status response type = {type(status_response.headers)}")
-                print(f"status_response = {status_response.headers["Sforce-Locator"]}")
-                status = status_response.headers["Sforce-Locator"]
-                print(f"Response data = {status_response.content}")
-            
-            csv_data = BytesIO(status_response.content)
-            # try:
-            #     url = f"{self.instance_url}/services/data/v{self.api_version}/analytics/reports/{report_id}/instances/{response.json()['id']}"
-            #     response = requests.get(url, headers=self.headers, json=body).json()
-            #     response.raise_for_status()
-            #     pprint(response.json())
-            #     data = response.json()  # Raise an error for bad responses
-            #     if data["factMap"] is not None:
-            #         all_rows = data.get('factMap', {}).get('T!T', {}).get('rows', [])
-            # except requests.exceptions.HTTPError as e:  # Catch HTTP errors
-            #     print(f"HTTP error occured. Failed to GET asynchronous report instance with id: {report_id}: {e}")
-            # except requests.exceptions.RequestException as e:  # Catch network errors
-            #     print(f"REQUESTS EXCEPTION occured. Failed to GET asynchronous report instance with id: {report_id}: {e}")
-            # except Exception as e:  # Catch all other exceptions
-            #     print(f"GET Failed to fetch report instance {report_id}: {response.status_code}\n{response.text}")
-            return pd.read_csv(csv_data) # or keep data separately for column h
-        
+        while True:
+            try:
+                if page_token:
+                    url = f"{self.instance_url}/services/data/{self.api_version}/analytics/reports/{report_id}?pageToken={page_token}&includeDetails={detail_param}"
+                    response = requests.get(url, headers=self.headers)
+                else:
+                    url = f"{self.instance_url}/services/data/{self.api_version}/analytics/reports/{report_id}"
+                    body = {
+                        "reportMetadata": {},
+                        "includeDetails": detail_param
+                    }
+                    response = requests.post(url, headers=self.headers, json=body)
 
-    def query(self, query):
-        return self.sf.query_all(query)
+                data = response.json()
 
-    def query_all(self, query):
-        return self.sf.query_all(query)
+                rows = data.get('factMap', {}).get('T!T', {}).get('rows', [])
+                all_rows.extend(rows)
 
-    def query_one(self, query):
-        return self.sf.query(query)
+                page_token = data.get('pageToken')
+                if not page_token:
+                    break
+            except requests.exceptions.HTTPError as e:  # Catch HTTP errors
+                print(f"Failed to fetch report {report_id}: {e}")
+            except requests.exceptions.RequestException as e:  # Catch network errors
+                print(f"Failed to fetch report {report_id}: {e}")
+            except Exception as e:  # Catch all other exceptions
+                print(f"Failed to fetch report {report_id}: {response.status_code}\n{response.text}")
 
-    def get_record(self, object_name, record_id):
-        return self.sf.get(object_name, record_id)
-
-    def create_record(self, object_name, data):
-        return self.sf.create(object_name, data)
-
-    def update_record(self, object_name, record_id, data):
-        return self.sf.update(object_name, record_id, data)
-
-    def delete_record(self, object_name, record_id):
-        return self.sf.delete(object_name, record_id)
-
-    def describe_object(self, object_name):
-        return self.sf.__getattr__(object_name).describe()
-
-    def describe_global(self):
-        return self.sf.describe()
-
-    def get_user_info(self):
-        return self.sf.get_user_info()
-
-    def get_limits(self):
-        return self.sf.limits()
-
-    def get_recent(self):
-        return self.sf.recent()
-
-    def get_versions(self):
-        return self.sf.versions()
-
-    def get_resources(self):
-        return self.sf.resources()
-
-    def get_sobjects(self):
-        return self.sf.get_sobjects()
-
-    def get_metadata(self, object_name):
-        return self.sf.__getattr__(object_name).metadata()
-
-    def get_layout(self, object_name, layout_type):
-        return self.sf.__getattr__(object_name).layout(layout_type)
-
-    def get_approval_layout(self, object_name):
-        return self.sf.__getattr__(object_name).approval_layout()
-
-    def get_describe_layouts(self, object_name):
-        return self.sf.__getattr__(object_name).describe_layouts()
-
-    def get_describe_layout(self, object_name, record_type_id):
-        return self.sf.__getattr__(object_name).describe_layout(record_type_id)
-
-    def get_describe_layouts_by_record_type(self, object_name, record_type_id):
-        return self.sf.__getattr__(object_name).describe_layouts_by_record_type(record_type_id)
-
-    def get_describe_tabs(self, object_name):
-        return self.sf.__getattr__(object_name).describe_tabs()
-
-    def get_describe_search_scope_order(self, object_name):
-        return self.sf.__getattr__(object_name).describe_search_scope_order()
+        return all_rows, data  # or keep data separately for column headers
 
 class SalesforceReportParser:
     def __init__(self, report_data):
@@ -305,18 +202,23 @@ class SalesforceReportParser:
 # Example usage
 auth = SalesforceJWTAuth()
 sf = auth.connect_to_salesforce()
-body_timesheets_query = "SELECT TimesheetNumber, CreatedDate, ServiceResourceID FROM Timesheet WHERE SR_Sales_Organization__c = '3400' AND Auxiliar__c = false AND CurrencyIsoCode = 'GBP'"
-sf_requests = SalesforceRequests(auth, sf.headers)
-report_data = sf_requests.fetch_report_data("00OHq000007fYBBMA2")
+sf_requests = SalesforceRequests(auth, sf)
+report_data = sf_requests.fetch_report_data("00OHq000007fYBBMA2", include_details=False)
 
-# invoice_report = SalesforceReportParser(report_data)
-# invoice_df = invoice_report.to_dataframe()
-print(report_data.head())
+invoice_report = SalesforceReportParser(report_data)
+invoice_df = invoice_report.to_dataframe()
+print(invoice_df.head())
 # Example API request
 # query = "SELECT Id, Name FROM User WHERE Name = 'Tony Mattingley'"
 # users = sf.query_all(query)
 
+<<<<<<< HEAD
 body = BulkQueryRequest(query="SELECT Id FROM Contact")
 body.validate()
 sf.post_bulk_job(body.to_dict())
 print(body)
+=======
+# if users["totalSize"] > 0:
+#     for record in users["records"]:
+#         print(f"{record['Name']}, Id: {record['Id']}")
+>>>>>>> 94368e148c7816e00fe27dafc07f30322147466a
