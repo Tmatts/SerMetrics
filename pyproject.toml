@@ -9,5 +9,5 @@ dependencies = [
     "jwt",
     "simple-salesforce",
     "pandas",
-    "dotenv"
+    "python-dotenv>=1.1.0",
 ]

@@ -337,6 +337,7 @@ dependencies = [
     { name = "dotenv" },
     { name = "jwt" },
     { name = "pandas" },
+    { name = "python-dotenv" },
     { name = "simple-salesforce" },
 ]
 
@@ -345,6 +346,7 @@ requires-dist = [
     { name = "dotenv" },
     { name = "jwt" },
     { name = "pandas" },
+    { name = "python-dotenv", specifier = ">=1.1.0" },
     { name = "simple-salesforce" },
 ]
 
