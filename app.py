@@ -37,11 +37,20 @@ class SalesforceJWTAuth:
         load_dotenv()
 
         self.private_key_path = os.getenv("PRIVATE_KEY_PATH")
-        self.private_key_path = os.path.abspath(self.private_key_path)
         if not self.private_key_path:
+            raise ValueError("PRIVATE_KEY_PATH environment variable is not set.")
+
+        # Ensure the private key path is absolute
+        if not os.path.isabs(self.private_key_path):
+            self.private_key_path = os.path.join(
+                os.path.dirname(os.path.abspath(__file__)), self.private_key_path
+            )
+        # Check if the private key file exists
+        if not os.path.exists(self.private_key_path):
             raise FileNotFoundError(
-                f"Private key file not found {self.private_key_path}"
-            ).strip('"')
+                f"Private key file not found at {self.private_key_path}"
+            )
+
         self.consumer_key = os.getenv("CONSUMER_KEY")
         self.username = os.getenv("USERNAME")
         self.token_url = os.getenv("TOKEN_URL")
@@ -67,6 +76,10 @@ class SalesforceJWTAuth:
 
     def generate_jwt(self):
         """Create a new JWT token."""
+        if not self.private_key_path:
+            raise ValueError(
+                "Private key path is not set. Please set PRIVATE_KEY_PATH."
+            )
         with open(self.private_key_path, "r") as key_file:
             private_key = key_file.read()
 
@@ -76,11 +89,20 @@ class SalesforceJWTAuth:
             "aud": self.token_url,
             "exp": int(time.time()) + 300,  # JWT valid for 5 minutes
         }
-        return jwt.encode(payload, private_key, alg="RS256")
+        return jwt.encode(payload, private_key, algorithm="RS256")
 
     def request_access_token(self):
         """Get a new access token from Salesforce."""
         jwt_token = self.generate_jwt()
+        if not jwt_token:
+            raise ValueError("Failed to generate JWT token.")
+        print("🔑 Requesting new Salesforce access token...")
+
+        if not self.token_url:
+            raise ValueError(
+                "TOKEN_URL is not set. Please check your environment variables."
+            )
+
         response = requests.post(
             self.token_url,
             data={
@@ -142,8 +164,9 @@ class SalesforceRequests:
         """
         all_rows = []
         page_token = None
+        run = True
 
-        while True:
+        while run:
             try:
                 if page_token:
                     url = f"{self.instance_url}/services/data/{self.api_version}/analytics/reports/{report_id}?pageToken={page_token}&includeDetails={detail_param}"
@@ -163,9 +186,12 @@ class SalesforceRequests:
                     break
             except requests.exceptions.HTTPError as e:  # Catch HTTP errors
                 print(f"Failed to fetch report {report_id}: {e}")
+                run = False
             except requests.exceptions.RequestException as e:  # Catch network errors
                 print(f"Failed to fetch report {report_id}: {e}")
+                run = False
             except Exception as e:  # Catch all other exceptions
+                run = False
                 print(
                     f"Failed to fetch report {report_id}: {response.status_code}\n{response.text}"
                 )
