@@ -174,6 +174,7 @@ cython_debug/
 # Salesforce sfdx
 # VS Code
 .vscode/
+!.vscode/settings.json
 
 # Salesforce DX
 .sf/

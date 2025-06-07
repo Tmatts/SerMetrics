@@ -1,4 +1,5 @@
 {
     "diffEditor.codeLens": true,
-    "terminal.explorerKind": "external"
+    "terminal.explorerKind": "external",
+    "ruff.configuration": ""
 }
