@@ -1,4 +1,4 @@
-from dataclasses import dataclass, asdict, field
+from dataclasses import dataclass, asdict
 from typing import Dict, Any
 
 
@@ -8,6 +8,9 @@ class BaseSalesforceRequest:
     Base class for all Salesforce request payloads.
     Provides helper methods for serialization and validation.
     """
+
+    content_type: str = "JSON"
+    line_ending: str = "LF"
 
     def to_dict(self) -> Dict[str, Any]:
         """

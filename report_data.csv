@@ -1,0 +1,81 @@
+Time Sheet Start Date,Time Sheet End Date,Name,Service Resource,Subject,Start Time,End Time,Accepted
+05/05/2025,11/05/2025,TSE-0002,Russell Baker,Work time entry,06/05/2025 07:00,06/05/2025 14:20,false
+12/05/2025,18/05/2025,TSE-0007,Mark Turner,Work time entry,06/05/2025 17:00,06/05/2025 20:00,false
+05/05/2025,11/05/2025,TSE-0007,Mark Beavis,Travel time entry,08/05/2025 05:00,08/05/2025 07:40,false
+05/05/2025,11/05/2025,TSE-0008,Mark Beavis,Work time entry,08/05/2025 07:40,08/05/2025 14:40,false
+05/05/2025,11/05/2025,TSE-0009,Mark Beavis,-,08/05/2025 14:40,08/05/2025 18:40,false
+05/05/2025,11/05/2025,TSE-0007,Russell Baker,Work time entry,09/05/2025 07:00,09/05/2025 12:40,false
+05/05/2025,11/05/2025,TSE-0011,Mark Beavis,Work time entry,09/05/2025 07:00,09/05/2025 12:40,false
+12/05/2025,18/05/2025,TSE-0002,Mark Beavis,Work time entry,12/05/2025 09:50,12/05/2025 18:15,false
+12/05/2025,18/05/2025,TSE-0005,Russell Baker,Work time entry,13/05/2025 06:30,13/05/2025 16:40,false
+12/05/2025,18/05/2025,TSE-0007,Russell Baker,Office,14/05/2025 05:30,14/05/2025 14:30,false
+12/05/2025,18/05/2025,TSE-0008,Mark Beavis,"Office to unload and reload different Van's for tomorrows install, plan jobs with Nic, collect materials.",14/05/2025 05:45,14/05/2025 16:30,false
+12/05/2025,18/05/2025,TSE-0010,Mark Beavis,Work time entry,15/05/2025 07:15,15/05/2025 16:15,false
+12/05/2025,18/05/2025,TSE-0012,Mark Beavis,Travel time entry,16/05/2025 04:30,16/05/2025 07:00,false
+12/05/2025,18/05/2025,TSE-0012,Russell Baker,Work time entry,16/05/2025 07:00,16/05/2025 15:20,false
+12/05/2025,18/05/2025,TSE-0013,Mark Beavis,Work time entry,16/05/2025 07:00,16/05/2025 15:20,false
+12/05/2025,18/05/2025,TSE-0014,Mark Beavis,-,16/05/2025 15:20,16/05/2025 18:00,false
+19/05/2025,25/05/2025,TSE-0003,Mark Beavis,Work time entry,19/05/2025 08:30,19/05/2025 11:30,false
+19/05/2025,25/05/2025,TSE-0032,Robin Dartnall,Travel,19/05/2025 15:00,19/05/2025 18:10,false
+19/05/2025,25/05/2025,TSE-0001,Mark Turner,Training,20/05/2025 08:01,20/05/2025 16:31,false
+19/05/2025,25/05/2025,TSE-0007,Mark Beavis,"Travel home, load up for tomorrows install",20/05/2025 17:00,20/05/2025 18:20,false
+19/05/2025,25/05/2025,TSE-0002,Mark Turner,Travel time entry,21/05/2025 09:00,21/05/2025 09:48,false
+19/05/2025,25/05/2025,TSE-0003,Mark Turner,Work time entry,21/05/2025 09:45,21/05/2025 11:30,false
+19/05/2025,25/05/2025,TSE-0006,Edgar Van Niekerk,Travel time entry,22/05/2025 06:20,22/05/2025 07:05,false
+19/05/2025,25/05/2025,TSE-0007,Edgar Van Niekerk,Work time entry,22/05/2025 07:05,22/05/2025 19:24,false
+19/05/2025,25/05/2025,TSE-0012,Mark Beavis,Work time entry,22/05/2025 08:15,22/05/2025 13:00,false
+19/05/2025,25/05/2025,TSE-0004,Mark Turner,Travel time entry,22/05/2025 09:31,22/05/2025 10:00,false
+19/05/2025,25/05/2025,TSE-0005,Mark Turner,Work time entry,22/05/2025 10:01,22/05/2025 14:03,false
+19/05/2025,25/05/2025,TSE-0008,Edgar Van Niekerk,Travel time entry,23/05/2025 06:20,23/05/2025 07:20,false
+19/05/2025,25/05/2025,TSE-0009,Edgar Van Niekerk,Work time entry,23/05/2025 07:29,23/05/2025 17:33,false
+26/05/2025,01/06/2025,TSE-0002,Mark Beavis,Travel time entry,27/05/2025 05:50,27/05/2025 08:20,false
+26/05/2025,01/06/2025,TSE-0003,Mark Beavis,Work time entry,27/05/2025 08:20,27/05/2025 10:00,false
+26/05/2025,01/06/2025,TSE-0004,Mark Beavis,Travel time entry,27/05/2025 10:00,27/05/2025 10:05,false
+26/05/2025,01/06/2025,TSE-0005,Mark Beavis,Work time entry,27/05/2025 10:05,27/05/2025 16:00,false
+26/05/2025,01/06/2025,TSE-0001,Mark Beavis,Manager Field Visit,28/05/2025 05:45,28/05/2025 17:00,false
+26/05/2025,01/06/2025,TSE-0001,Trefor Williamson,Manager Field Visit,28/05/2025 07:55,28/05/2025 17:45,false
+26/05/2025,01/06/2025,TSE-0011,Trefor Williamson,Travel time entry,29/05/2025 09:50,29/05/2025 10:55,false
+26/05/2025,01/06/2025,TSE-0012,Trefor Williamson,Work time entry,29/05/2025 09:50,29/05/2025 10:55,false
+26/05/2025,01/06/2025,TSE-0013,Trefor Williamson,Travel time entry,29/05/2025 11:35,29/05/2025 12:50,false
+26/05/2025,01/06/2025,TSE-0015,Trefor Williamson,Work time entry,29/05/2025 11:35,29/05/2025 12:50,false
+26/05/2025,01/06/2025,TSE-0016,Trefor Williamson,Work time entry,29/05/2025 13:39,29/05/2025 14:05,false
+26/05/2025,01/06/2025,TSE-0014,Trefor Williamson,Training with Brian - R300999- ANNUAL SERVICE ON ALL ASSETS,29/05/2025 14:35,29/05/2025 15:45,false
+26/05/2025,01/06/2025,TSE-0006,Mark Beavis,Office,30/05/2025 06:00,30/05/2025 18:30,false
+26/05/2025,01/06/2025,TSE-0012,Russell Baker,Work time entry,30/05/2025 09:45,30/05/2025 11:20,false
+26/05/2025,01/06/2025,TSE-0018,Trefor Williamson,Travel time entry,01/06/2025 15:00,01/06/2025 19:49,false
+26/05/2025,01/06/2025,TSE-0019,Trefor Williamson,Work time entry,01/06/2025 19:49,01/06/2025 19:50,false
+02/06/2025,08/06/2025,TSE-0001,Anthony Hilsden,Travel time entry,02/06/2025 07:30,02/06/2025 09:30,false
+02/06/2025,08/06/2025,TSE-0002,Mark Beavis,Work time entry,02/06/2025 07:45,02/06/2025 15:50,false
+02/06/2025,08/06/2025,TSE-0002,Anthony Hilsden,Work time entry,02/06/2025 09:30,02/06/2025 10:00,false
+02/06/2025,08/06/2025,TSE-0008,Anthony Hilsden,Travel time entry,02/06/2025 10:00,02/06/2025 10:30,false
+02/06/2025,08/06/2025,TSE-0009,Anthony Hilsden,Work time entry,02/06/2025 10:30,02/06/2025 11:40,false
+02/06/2025,08/06/2025,TSE-0003,Anthony Hilsden,Lunch,02/06/2025 12:02,02/06/2025 12:32,false
+02/06/2025,08/06/2025,TSE-0005,Mark Beavis,Work time entry,03/06/2025 07:15,03/06/2025 15:20,false
+02/06/2025,08/06/2025,TSE-0001,Mark Turner,Training,03/06/2025 08:06,03/06/2025 16:36,false
+02/06/2025,08/06/2025,TSE-0005,Edgar Van Niekerk,Travel time entry,03/06/2025 09:37,03/06/2025 10:02,false
+02/06/2025,08/06/2025,TSE-0006,Edgar Van Niekerk,Work time entry,03/06/2025 10:03,03/06/2025 13:00,false
+02/06/2025,08/06/2025,TSE-0001,Edgar Van Niekerk,Travel,03/06/2025 13:00,03/06/2025 16:30,false
+02/06/2025,08/06/2025,TSE-0002,Mark Turner,Training,04/06/2025 08:01,04/06/2025 16:31,false
+02/06/2025,08/06/2025,TSE-0008,Russell Baker,Work time entry,04/06/2025 09:50,04/06/2025 12:05,false
+02/06/2025,08/06/2025,TSE-0011,Russell Baker,Work time entry,05/06/2025 07:45,05/06/2025 11:15,false
+02/06/2025,08/06/2025,TSE-0003,Mark Turner,Training,05/06/2025 07:46,05/06/2025 16:16,false
+02/06/2025,08/06/2025,TSE-0037,Owen Foster,Travel time entry,06/06/2025 06:00,06/06/2025 08:00,false
+02/06/2025,08/06/2025,TSE-0016,Simon Wright,Office,06/06/2025 06:55,06/06/2025 17:02,false
+02/06/2025,08/06/2025,TSE-0038,Owen Foster,Work time entry,06/06/2025 08:00,06/06/2025 10:00,false
+02/06/2025,08/06/2025,TSE-0005,Eddie Findlay,Training,06/06/2025 08:03,06/06/2025 16:33,false
+02/06/2025,08/06/2025,TSE-0037,Anthony Hilsden,Work time entry,06/06/2025 08:30,06/06/2025 11:00,false
+02/06/2025,08/06/2025,TSE-0037,Robin Dartnall,Travel time entry,06/06/2025 08:39,06/06/2025 08:59,false
+02/06/2025,08/06/2025,TSE-0038,Robin Dartnall,Travel time entry,06/06/2025 08:59,06/06/2025 11:00,false
+02/06/2025,08/06/2025,TSE-0039,Owen Foster,Travel time entry,06/06/2025 10:00,06/06/2025 10:05,false
+02/06/2025,08/06/2025,TSE-0040,Owen Foster,Work time entry,06/06/2025 10:05,06/06/2025 11:30,false
+02/06/2025,08/06/2025,TSE-0039,Robin Dartnall,Work time entry,06/06/2025 11:00,06/06/2025 11:41,false
+02/06/2025,08/06/2025,TSE-0041,Owen Foster,Travel time entry,06/06/2025 11:35,06/06/2025 12:05,false
+02/06/2025,08/06/2025,TSE-0040,Robin Dartnall,Work time entry,06/06/2025 11:42,06/06/2025 12:15,false
+02/06/2025,08/06/2025,TSE-0042,Owen Foster,Work time entry,06/06/2025 12:05,06/06/2025 12:30,false
+02/06/2025,08/06/2025,TSE-0041,Robin Dartnall,Travel time entry,06/06/2025 12:22,06/06/2025 13:05,false
+02/06/2025,08/06/2025,TSE-0042,Robin Dartnall,Work time entry,06/06/2025 13:06,06/06/2025 14:32,false
+02/06/2025,08/06/2025,TSE-0043,Robin Dartnall,Travel time entry,06/06/2025 14:40,06/06/2025 15:32,false
+02/06/2025,08/06/2025,TSE-0051,Mathew Hancock,Work time entry,06/06/2025 15:20,06/06/2025 16:11,false
+02/06/2025,08/06/2025,TSE-0044,Robin Dartnall,Work time entry,06/06/2025 15:32,06/06/2025 16:13,false
+02/06/2025,08/06/2025,TSE-0007,Owen Foster,Lunch,06/06/2025 16:29,06/06/2025 16:59,false
+02/06/2025,08/06/2025,TSE-0045,Robin Dartnall,Lunch,06/06/2025 16:56,06/06/2025 17:26,false

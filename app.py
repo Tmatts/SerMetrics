@@ -69,7 +69,10 @@ class SalesforceJWTAuth:
         }
 
         response = requests.get(url, headers=headers)
-        response.raise_for_status()
+        if not response.headers.get("Content-Type", "").startswith("application/json"):
+            raise ValueError(
+                f"Unexpected content type: {response.headers.get('Content-Type')}"
+            )
         versions = response.json()
         self.api_version = versions[-1]["version"]
         return None
@@ -158,29 +161,46 @@ class SalesforceRequests:
         detail_param = (
             "includeDetails=true" if include_details else "includeDetails=false"
         )
-
+    
         """
         Run the report with pagination and return all rows.
         """
         all_rows = []
         page_token = None
         run = True
-
+    
         while run:
             try:
                 if page_token:
-                    url = f"{self.instance_url}/services/data/{self.api_version}/analytics/reports/{report_id}?pageToken={page_token}&includeDetails={detail_param}"
+                    from urllib.parse import urlencode
+                    query_params = {"pageToken": page_token, "includeDetails": detail_param}
+                    encoded_params = urlencode(query_params)
+                    url = f"{self.instance_url}/services/data/{self.api_version}/analytics/reports/{report_id}?{encoded_params}"
                     response = requests.get(url, headers=self.headers)
                 else:
                     url = f"{self.instance_url}/services/data/{self.api_version}/analytics/reports/{report_id}"
                     body = {"reportMetadata": {}, "includeDetails": detail_param}
                     response = requests.post(url, headers=self.headers, json=body)
-
+                response.raise_for_status()
+                print(f"Fetching report {report_id}...")
+                # Check if the response is JSON
+                if not response.headers.get("Content-Type", "").startswith("application/json"):
+                    raise ValueError(
+                        f"Unexpected content type: {response.headers.get('Content-Type')}"
+                    )
+                if response.status_code == 204:
+                    print(f"No data found for report {report_id}.")
+                    return [], {}  # Return empty data if no content
+                if response.status_code == 202:
+                    print(f"Report {report_id} is still processing. Please try again later.")
+                    return [], {}
+                # Parse the JSON response
+                print(f"Report {report_id} fetched successfully.")
                 data = response.json()
-
+    
                 rows = data.get("factMap", {}).get("T!T", {}).get("rows", [])
                 all_rows.extend(rows)
-
+    
                 page_token = data.get("pageToken")
                 if not page_token:
                     break
@@ -195,7 +215,7 @@ class SalesforceRequests:
                 print(
                     f"Failed to fetch report {report_id}: {response.status_code}\n{response.text}"
                 )
-
+    
         return all_rows, data  # or keep data separately for column headers
 
 
